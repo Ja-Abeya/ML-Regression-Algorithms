@@ -1,0 +1,44 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+import matplotlib.pyplot as plt
+
+# Load the dataset
+df = pd.read_csv('train.csv')
+
+# Assuming the target variable is named 'target_column'
+target_column = 'target_column'
+
+# Assuming you have selected relevant features for prediction
+feature_columns = ['feature1', 'feature2', 'feature3']
+
+# Create feature matrix (X) and target vector (y)
+X = df[feature_columns]
+y = df[target_column]
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Hyperparameter Tuning using Grid Search for Random Forest
+param_grid = {
+    'n_estimators': [50, 100, 200],
+    'max_depth': [None, 10, 20],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4]
+}
+
+grid_search = GridSearchCV(RandomForestRegressor(random_state=42), param_grid, cv=5, scoring='neg_mean_squared_error')
+grid_search.fit(X_train, y_train)
+
+best_rf_model = grid_search.best_estimator_
+y_pred_best_rf = best_rf_model.predict(X_test)
+
+# Evaluate the best Random Forest model
+mse_best_rf = mean_squared_error(y_test, y_pred_best_rf)
+print(f'Best Random Forest Model Mean Squared Error: {mse_best_rf}')
+
+# Visualize predictions vs actual values for the best Random Forest model
+plt.scatter(y_test, y_pred_best_rf)
+plt.xlabel('Actual Values')
+plt
